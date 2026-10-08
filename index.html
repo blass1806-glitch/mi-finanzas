@@ -50,7 +50,7 @@
 </main>
 <nav class="bottom-nav"><button class="nav-btn active" data-view="home">🏠<span>Inicio</span></button><button class="nav-btn" data-view="movements">📋<span>Mov.</span></button><button class="nav-btn" data-view="stats">📊<span>Estad.</span></button><button class="nav-btn" data-view="settings">⚙️<span>Ajustes</span></button></nav>
 </div>
-<dialog id="txDialog"><form id="txForm" method="dialog" class="modal-card">
+<div id="txModal" class="modal"><form id="txForm" class="modal-card">
   <div class="section-head"><h2 id="dialogTitle">Nuevo movimiento</h2><button type="button" id="closeDialog" class="icon-btn">✕</button></div>
   <div class="segmented"><button type="button" class="segment active" data-type="income">Ingreso</button><button type="button" class="segment" data-type="expense">Egreso</button></div>
   <label>Monto<input id="txAmount" type="number" min="0.01" step="0.01" inputmode="decimal" required placeholder="0,00"></label>
@@ -59,8 +59,8 @@
   <label>Fecha<input id="txDate" type="date" required></label>
   <label>Nota<textarea id="txNote" rows="3" maxlength="160" placeholder="Opcional"></textarea></label>
   <input id="txId" type="hidden">
-  <button type="submit" class="primary">Guardar movimiento</button><button type="button" id="deleteTx" class="danger hidden">Eliminar movimiento</button>
-</form></dialog>
+  <button type="submit" class="primary">Guardar movimiento</button><button type="button" id="deleteTx" class="danger hidden">Eliminar movimiento</button><button type="button" id="cancelDialog" class="secondary">Cancelar</button>
+</form></div>
 <script src="app.js"></script>
 </body>
 </html>
