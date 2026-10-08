@@ -1,9 +1,10 @@
 {
-  "name": "Mi Finanzas",
-  "short_name": "Finanzas",
-  "start_url": ".",
+  "name": "Mi Bolsillo",
+  "short_name": "Mi Bolsillo",
+  "start_url": "./?v=5",
   "display": "standalone",
-  "background_color": "#f3f4f6",
-  "theme_color": "#111827",
-  "lang": "es"
+  "background_color": "#f6f7f9",
+  "theme_color": "#f6f7f9",
+  "lang": "es",
+  "description": "Control personal de ingresos y egresos."
 }
