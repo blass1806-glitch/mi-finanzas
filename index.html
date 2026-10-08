@@ -1,66 +1,139 @@
 <!doctype html>
 <html lang="es">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta name="theme-color" content="#111827">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="apple-mobile-web-app-title" content="Mi Finanzas">
-  <link rel="manifest" href="manifest.json">
-  <link rel="apple-touch-icon" href="icon.svg">
-  <link rel="stylesheet" href="styles.css">
-  <title>Mi Finanzas</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#111827">
+<title>Mi Finanzas</title>
+<style>
+*{box-sizing:border-box}body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:#f3f4f6;color:#111827}
+header{position:sticky;top:0;z-index:5;background:#111827;color:white;padding:16px max(16px,env(safe-area-inset-left));padding-top:max(16px,env(safe-area-inset-top))}
+header h1{margin:0;font-size:22px}.app{max-width:720px;margin:auto;padding-bottom:90px}
+main{padding:16px}.view{display:none}.view.active{display:block}
+.card{background:white;border-radius:16px;padding:16px;margin-bottom:14px;box-shadow:0 2px 10px #0000000b}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}.metric{padding:14px;background:#f9fafb;border-radius:12px}.metric small{display:block;color:#6b7280}.metric strong{font-size:20px}
+button{border:0;border-radius:12px;padding:12px 15px;font-size:16px;font-weight:600;cursor:pointer}.primary{background:#111827;color:white}.secondary{background:#e5e7eb;color:#111827}
+.nav{position:fixed;bottom:0;left:0;right:0;background:white;border-top:1px solid #ddd;display:flex;justify-content:center;gap:4px;padding:8px max(8px,env(safe-area-inset-left));padding-bottom:max(8px,env(safe-area-inset-bottom));z-index:10}
+.nav button{background:transparent;font-size:12px;padding:8px;flex:1;max-width:130px}.nav button.active{background:#e5e7eb}
+.fab{position:fixed;right:20px;bottom:76px;border-radius:50%;width:58px;height:58px;font-size:28px;padding:0;z-index:9;box-shadow:0 4px 14px #0003}
+label{display:block;font-weight:600;margin:12px 0 6px}input,select{width:100%;padding:12px;border:1px solid #d1d5db;border-radius:10px;background:white;font-size:16px}
+.row{display:flex;gap:8px}.row>*{flex:1}.type{display:flex;gap:8px}.type button{flex:1}.type .selected{background:#111827;color:white}
+.tx{display:flex;justify-content:space-between;gap:12px;padding:12px 0;border-bottom:1px solid #eee}.tx:last-child{border-bottom:0}.income{color:#047857}.expense{color:#b91c1c}
+.modal{position:fixed;inset:0;background:#0007;z-index:20;display:none;align-items:flex-end}.modal.open{display:flex}.sheet{background:white;width:100%;max-height:92vh;overflow:auto;border-radius:20px 20px 0 0;padding:20px; padding-bottom:max(24px,env(safe-area-inset-bottom))}
+.actions{display:flex;gap:8px;margin-top:18px}.actions button{flex:1}.muted{color:#6b7280}.empty{text-align:center;padding:25px;color:#6b7280}
+</style>
 </head>
 <body>
-<div class="app-shell">
-<header class="topbar">
-  <div><div class="eyebrow">Panel financiero</div><h1>Mi Finanzas</h1></div>
-  <button id="quickAdd" class="icon-btn" aria-label="Agregar movimiento">＋</button>
-</header>
+<div class="app">
+<header><h1>Mi Finanzas</h1></header>
 <main>
-<section id="view-home" class="view active">
-  <div class="card hero-card"><div class="label">Capital actual</div><div id="capitalActual" class="hero-amount">$0,00</div><div class="hero-sub">Capital inicial + ingresos − egresos</div></div>
-  <div class="summary-grid">
-    <div class="card stat-card"><div class="label">Ingresos del mes</div><div id="incomeMonth" class="amount positive">$0,00</div></div>
-    <div class="card stat-card"><div class="label">Egresos del mes</div><div id="expenseMonth" class="amount negative">$0,00</div></div>
-  </div>
-  <div class="card"><div class="section-head"><h2>Gastos por categoría</h2><span id="periodLabel" class="muted"></span></div><div id="categoryBars" class="bars"></div></div>
-  <div class="card"><div class="section-head"><h2>Últimos movimientos</h2><button class="link-btn" data-nav="movements">Ver todos</button></div><div id="recentList" class="list"></div></div>
+<section id="dashboard" class="view active">
+<div class="card"><h2>Capital actual</h2><div id="capital" style="font-size:34px;font-weight:800">$0.00</div></div>
+<div class="grid"><div class="metric"><small>Ingresos</small><strong id="monthIncome">$0</strong></div><div class="metric"><small>Egresos</small><strong id="monthExpense">$0</strong></div><div class="metric"><small>Balance</small><strong id="monthBalance">$0</strong></div></div>
+<div class="card"><h3>Movimientos recientes</h3><div id="recent"></div></div>
 </section>
-<section id="view-movements" class="view">
-  <div class="section-head page-head"><h2>Movimientos</h2><button id="addFromMovements" class="primary small">+ Nuevo</button></div>
-  <div class="filters card"><select id="filterType"><option value="all">Todos</option><option value="income">Ingresos</option><option value="expense">Egresos</option></select><input id="filterMonth" type="month"></div>
-  <div id="movementSummary" class="muted summary-line"></div>
-  <div id="movementList" class="list card"></div>
-</section>
-<section id="view-stats" class="view">
-  <div class="section-head page-head"><h2>Estadísticas</h2><input id="statsMonth" type="month"></div>
-  <div class="summary-grid"><div class="card stat-card"><div class="label">Ingresos</div><div id="statsIncome" class="amount positive">$0,00</div></div><div class="card stat-card"><div class="label">Egresos</div><div id="statsExpense" class="amount negative">$0,00</div></div></div>
-  <div class="card"><div class="label">Balance del mes</div><div id="statsBalance" class="hero-amount">$0,00</div></div>
-  <div class="card"><h2>Ingresos por categoría</h2><div id="incomeBreakdown" class="breakdown"></div></div>
-  <div class="card"><h2>Egresos por categoría</h2><div id="expenseBreakdown" class="breakdown"></div></div>
-  <div class="card"><h2>Egresos por subcategoría</h2><div id="subcategoryBreakdown" class="breakdown"></div></div>
-</section>
-<section id="view-settings" class="view">
-  <div class="section-head page-head"><h2>Configuración</h2></div>
-  <div class="card form-stack"><label>Capital inicial<input id="initialCapital" inputmode="decimal" placeholder="0,00"></label><button id="saveCapital" class="primary">Guardar capital inicial</button><div id="settingsMessage" class="muted" aria-live="polite"></div></div>
-  <div class="card form-stack"><h2>Datos</h2><button id="exportData" class="secondary">Exportar copia de seguridad</button><label class="secondary file-btn">Importar copia de seguridad<input id="importData" type="file" accept="application/json" hidden></label><button id="clearData" class="danger">Eliminar todos los datos</button><p class="muted">Tus datos se guardan localmente en este navegador. Exporta una copia periódicamente para no perderlos.</p></div>
-</section>
+<section id="movimientos" class="view"><div class="card"><h2>Movimientos</h2><div id="list"></div></div></section>
+<section id="estadisticas" class="view"><div class="card"><h2>Estadísticas</h2><div id="stats"></div></div></section>
+<section id="ajustes" class="view"><div class="card"><h2>Ajustes</h2><label>Capital inicial</label><input id="initialCapital" type="number" step="0.01"><button id="saveSettings" class="primary" style="margin-top:12px;width:100%">Guardar</button></div>
+<div class="card"><button id="exportBtn" class="secondary" style="width:100%">Exportar datos</button></div></section>
 </main>
-<nav class="bottom-nav"><button class="nav-btn active" data-view="home">🏠<span>Inicio</span></button><button class="nav-btn" data-view="movements">📋<span>Mov.</span></button><button class="nav-btn" data-view="stats">📊<span>Estad.</span></button><button class="nav-btn" data-view="settings">⚙️<span>Ajustes</span></button></nav>
 </div>
-<div id="txModal" class="modal"><form id="txForm" class="modal-card">
-  <div class="section-head"><h2 id="dialogTitle">Nuevo movimiento</h2><button type="button" id="closeDialog" class="icon-btn">✕</button></div>
-  <div class="segmented"><button type="button" class="segment active" data-type="income">Ingreso</button><button type="button" class="segment" data-type="expense">Egreso</button></div>
-  <label>Monto<input id="txAmount" type="number" min="0.01" step="0.01" inputmode="decimal" required placeholder="0,00"></label>
-  <label>Categoría<select id="txCategory" required></select></label>
-  <label id="subcategoryWrap" class="hidden">Subcategoría<select id="txSubcategory"></select></label>
-  <label>Fecha<input id="txDate" type="date" required></label>
-  <label>Nota<textarea id="txNote" rows="3" maxlength="160" placeholder="Opcional"></textarea></label>
-  <input id="txId" type="hidden">
-  <button type="submit" class="primary">Guardar movimiento</button><button type="button" id="deleteTx" class="danger hidden">Eliminar movimiento</button><button type="button" id="cancelDialog" class="secondary">Cancelar</button>
-</form></div>
-<script src="app.js"></script>
-</body>
-</html>
+
+<button id="addBtn" class="primary fab" type="button">+</button>
+<nav class="nav">
+<button data-view="dashboard" class="active">Inicio</button><button data-view="movimientos">Movimientos</button><button data-view="estadisticas">Estadísticas</button><button data-view="ajustes">Ajustes</button>
+</nav>
+
+<div id="modal" class="modal">
+<div class="sheet">
+<h2 id="modalTitle">Nuevo movimiento</h2>
+<div class="type"><button id="incomeBtn" type="button" class="selected">Ingreso</button><button id="expenseBtn" type="button" class="secondary">Egreso</button></div>
+<label>Monto</label><input id="amount" type="number" min="0" step="0.01" placeholder="0.00">
+<label>Categoría</label>
+<select id="category"></select>
+<div id="subcategoryWrap"><label>Subcategoría</label><select id="subcategory"></select></div>
+<label>Fecha</label><input id="date" type="date">
+<label>Nota (opcional)</label><input id="note" type="text" placeholder="Ej. pedido del viernes">
+<div class="actions"><button id="cancelBtn" class="secondary" type="button">Cancelar</button><button id="saveBtn" class="primary" type="button">Guardar</button></div>
+</div></div>
+
+<script>
+const KEY="miFinanzasDataV4";
+const expenseCats={
+ "Hogar":["Higiene personal","Limpieza","Arriendo","Luz","Agua"],
+ "Moto":["Llantas","Gasolina","Aceites y filtros","Repuestos"],
+ "Comida":["Desayuno","Almuerzo","Cena","Golosinas"]
+};
+const incomeCats=["PedidosYa","Otros ingresos"];
+let data=JSON.parse(localStorage.getItem(KEY)||'{"initialCapital":0,"transactions":[]}');
+let type="income", editing=null;
+const $=id=>document.getElementById(id);
+function today(){const d=new Date();return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")}
+function money(n){return "$"+Number(n||0).toFixed(2)}
+function persist(){localStorage.setItem(KEY,JSON.stringify(data))}
+function populateCategories(){
+ const cat=$("category"), sub=$("subcategory");
+ cat.innerHTML="";
+ const values=type==="income"?incomeCats:Object.keys(expenseCats);
+ values.forEach(x=>{const o=document.createElement("option");o.value=x;o.textContent=x;cat.appendChild(o)});
+ if(type==="expense") populateSub();
+ $("subcategoryWrap").style.display=type==="expense"?"block":"none";
+}
+function populateSub(){
+ const sub=$("subcategory");sub.innerHTML="";
+ (expenseCats[$("category").value]||[]).forEach(x=>{const o=document.createElement("option");o.value=x;o.textContent=x;sub.appendChild(o)});
+}
+function setType(t){
+ type=t;
+ $("incomeBtn").className=t==="income"?"selected":"secondary";
+ $("expenseBtn").className=t==="expense"?"selected":"secondary";
+ populateCategories();
+}
+function openModal(tx=null){
+ editing=tx; $("modalTitle").textContent=tx?"Editar movimiento":"Nuevo movimiento";
+ type=tx?tx.type:"income"; setType(type);
+ $("amount").value=tx?.amount??"";
+ $("date").value=tx?.date||today(); $("note").value=tx?.note||"";
+ if(tx){$("category").value=tx.category; if(type==="expense"){$("subcategory").value=tx.subcategory;}}
+ $("modal").classList.add("open");
+}
+function closeModal(){$("modal").classList.remove("open");editing=null}
+function saveTx(){
+ const amount=Number($("amount").value);
+ if(!amount||amount<=0){alert("Ingresa un monto válido.");return}
+ const tx={id:editing?.id||Date.now().toString(),type,amount,category:$("category").value,subcategory:type==="expense"?$("subcategory").value:"",date:$("date").value||today(),note:$("note").value.trim()};
+ if(editing){const i=data.transactions.findIndex(x=>x.id===editing.id);if(i>=0)data.transactions[i]=tx}else data.transactions.push(tx);
+ persist();closeModal();render();
+}
+function totals(){
+ let income=0,expense=0;data.transactions.forEach(t=>t.type==="income"?income+=Number(t.amount):expense+=Number(t.amount));
+ return {income,expense,capital:Number(data.initialCapital||0)+income-expense}
+}
+function monthTotals(){
+ const ym=today().slice(0,7);let income=0,expense=0;
+ data.transactions.filter(t=>t.date?.slice(0,7)===ym).forEach(t=>t.type==="income"?income+=Number(t.amount):expense+=Number(t.amount));
+ return {income,expense,balance:income-expense}
+}
+function txHtml(t,actions=true){
+ return `<div class="tx"><div><b>${t.category}${t.subcategory?" · "+t.subcategory:""}</b><div class="muted">${t.date}${t.note?" · "+t.note:""}</div></div><div style="text-align:right"><b class="${t.type}">${t.type==="income"?"+":"-"}${money(t.amount)}</b>${actions?`<div><button type="button" class="secondary edit" data-id="${t.id}" style="padding:5px 8px;font-size:12px">Editar</button> <button type="button" class="secondary del" data-id="${t.id}" style="padding:5px 8px;font-size:12px">Borrar</button></div>`:""}</div></div>`;
+}
+function render(){
+ const t=totals(),m=monthTotals();$("capital").textContent=money(t.capital);$("monthIncome").textContent=money(m.income);$("monthExpense").textContent=money(m.expense);$("monthBalance").textContent=money(m.balance);
+ const sorted=[...data.transactions].sort((a,b)=>b.date.localeCompare(a.date)||b.id.localeCompare(a.id));
+ $("recent").innerHTML=sorted.slice(0,5).map(x=>txHtml(x,false)).join("")||'<div class="empty">Aún no hay movimientos.</div>';
+ $("list").innerHTML=sorted.map(x=>txHtml(x,true)).join("")||'<div class="empty">Aún no hay movimientos.</div>';
+ const cats={};data.transactions.filter(x=>x.type==="expense").forEach(x=>{cats[x.category]=(cats[x.category]||0)+Number(x.amount)});
+ $("stats").innerHTML=Object.keys(cats).map(k=>`<p><b>${k}</b><br>${money(cats[k])}</p>`).join("")||'<div class="empty">Aún no hay egresos.</div>';
+ $("initialCapital").value=data.initialCapital||0;
+}
+document.querySelectorAll("[data-view]").forEach(b=>b.addEventListener("click",()=>{document.querySelectorAll(".view").forEach(v=>v.classList.remove("active"));$(b.dataset.view).classList.add("active");document.querySelectorAll("[data-view]").forEach(x=>x.classList.remove("active"));b.classList.add("active")}));
+$("addBtn").addEventListener("click",()=>openModal());
+$("incomeBtn").addEventListener("click",()=>setType("income"));$("expenseBtn").addEventListener("click",()=>setType("expense"));
+$("category").addEventListener("change",()=>{if(type==="expense")populateSub()});
+$("cancelBtn").addEventListener("click",closeModal);$("saveBtn").addEventListener("click",saveTx);
+$("list").addEventListener("click",e=>{const id=e.target.dataset.id;if(!id)return;const tx=data.transactions.find(x=>x.id===id);if(e.target.classList.contains("edit"))openModal(tx);if(e.target.classList.contains("del")&&confirm("¿Borrar este movimiento?")){data.transactions=data.transactions.filter(x=>x.id!==id);persist();render()}});
+$("saveSettings").addEventListener("click",()=>{data.initialCapital=Number($("initialCapital").value)||0;persist();render();alert("Guardado.")});
+$("exportBtn").addEventListener("click",()=>{const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([JSON.stringify(data,null,2)],{type:"application/json"}));a.download="mi-finanzas-backup.json";a.click()});
+$("date").value=today();populateCategories();render();
+</script>
+</body></html>
